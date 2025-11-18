@@ -14,12 +14,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type userHandler struct {
+type UserHandler struct {
 	userService service.IUserService
 }
 
-func NewUserHandler(svc service.IUserService) *userHandler {
-	return &userHandler{
+func NewUserHandler(svc service.IUserService) *UserHandler {
+	return &UserHandler{
 		userService: svc,
 	}
 }
@@ -36,7 +36,7 @@ func getUserID(c *gin.Context) (uint, bool) {
 	}
 	return userID, true
 }
-func (h *userHandler) Register(c *gin.Context) {
+func (h *UserHandler) Register(c *gin.Context) {
 	var req types.RegisterRequest
 	if err := c.ShouldBind(&req); err != nil {
 		ValidationError(c, "INVALID", "错误的请求参数", err.Error())
@@ -49,7 +49,7 @@ func (h *userHandler) Register(c *gin.Context) {
 	}
 	Success(c, http.StatusOK, resq)
 }
-func (h *userHandler) Login(c *gin.Context) {
+func (h *UserHandler) Login(c *gin.Context) {
 	var req types.LoginRequest
 	if err := c.ShouldBind(&req); err != nil {
 		ValidationError(c, "VALIDATION_ERROR", "参数错误", err.Error())
@@ -61,7 +61,7 @@ func (h *userHandler) Login(c *gin.Context) {
 	}
 	Success(c, http.StatusOK, resq)
 }
-func (h *userHandler) GetUserInfo(c *gin.Context) {
+func (h *UserHandler) GetUserInfo(c *gin.Context) {
 	currentUserId, _ := getUserID(c)
 	targetUserIDstr := c.Query("user_id")
 	if targetUserIDstr == "" {
@@ -75,7 +75,7 @@ func (h *userHandler) GetUserInfo(c *gin.Context) {
 	}
 	Success(c, http.StatusOK, resq)
 }
-func (h *userHandler) UploadAvatar(c *gin.Context) {
+func (h *UserHandler) UploadAvatar(c *gin.Context) {
 	//获取userid
 	userID, ok := getUserID(c)
 	if !ok {
