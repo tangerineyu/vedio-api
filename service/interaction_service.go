@@ -12,7 +12,7 @@ import (
 
 type IInteractionService interface {
 	FavoriteAction(userID, videoID uint, actionType int) error
-	GetFavoriteList(userID uint) (*types.VideoListResponse, error)
+	GetFavoriteList(userID uint, currentUserID uint) (*types.VideoListResponse, error)
 	CommentAction(userID, videoID uint, actionType int, commentText string, commentID uint) (*types.CommentInfo, error)
 	GetCommentList(videoID uint) (*types.CommentListResponse, error)
 }
@@ -56,8 +56,8 @@ func (i *InteractionService) FavoriteAction(userID, videoID uint, actionType int
 	return i.InteractionRepo.RemoveFavorite(userID, videoID)
 }
 
-func (i *InteractionService) GetFavoriteList(userID uint) (*types.VideoListResponse, error) {
-	videos, err := i.InteractionRepo.GetFavoriteVideoList(userID)
+func (i *InteractionService) GetFavoriteList(targetUserID uint, currentUserID uint) (*types.VideoListResponse, error) {
+	videos, err := i.InteractionRepo.GetFavoriteVideoList(targetUserID)
 	if err != nil {
 		return nil, errors.New("failed to get videos")
 	}
