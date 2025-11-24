@@ -24,7 +24,7 @@ func NewUserHandler(svc service.IUserService) *UserHandler {
 	}
 }
 func getUserID(c *gin.Context) (uint, bool) {
-	userIDVal, exist := c.Get("user_id")
+	userIDVal, exist := c.Get("userID")
 	if !exist {
 		Error(c, http.StatusUnauthorized, "AUTH_ERROR", "无法获取用户信息")
 		return 0, false
@@ -62,7 +62,10 @@ func (h *UserHandler) Login(c *gin.Context) {
 	Success(c, http.StatusOK, resq)
 }
 func (h *UserHandler) GetUserInfo(c *gin.Context) {
+	fmt.Println("5.进入了Handler")
 	currentUserId, _ := getUserID(c)
+	val, exists := c.Get("user_id")
+	fmt.Println("6.Handler中获取的user_id：", val, "是否存在：", exists)
 	targetUserIDstr := c.Query("user_id")
 	if targetUserIDstr == "" {
 		Error(c, http.StatusBadRequest, "Auth_FAILD", "缺少user_id")
@@ -88,15 +91,17 @@ func (h *UserHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 	//构建路径
-	filename := fmt.Sprintf("%d-%s", userID, file)
+	filename := fmt.Sprintf("%d-%s", userID, file.Filename)
 	saveDir := "./uploads/avatar/"
 	dst := filepath.Join(saveDir, filename)
 	//确保目录存在
+	fmt.Println("保存头像的路径：", dst)
 	if err := os.MkdirAll(saveDir, 0755); err != nil {
 		Error(c, http.StatusInternalServerError, "FILE_SAVE_ERROR", "文件创建失败")
 		return
 	}
 	if err := c.SaveUploadedFile(file, dst); err != nil {
+		fmt.Println("保存文件出错：", err)
 		Error(c, http.StatusInternalServerError, "UPLOAD_FAILD", "文件保存失败")
 		return
 	}

@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"video-api/handler"
@@ -14,7 +15,9 @@ import (
 // 验证access token
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		fmt.Println("进入了中间件")
 		authHeader := c.GetHeader("Authorization")
+		fmt.Println("收到Header:", authHeader)
 		if authHeader == "" {
 			authHeader = c.Query("token")
 			if authHeader == "" {
@@ -33,6 +36,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 		claims, err := utils.ParseToken(tokenString)
 		if err != nil {
+			fmt.Println("3.token解析失败，错误信息：", err)
 			if errors.Is(err, jwt.ErrTokenExpired) {
 				handler.Error(c, http.StatusUnauthorized, "AUTH_TOKEN_EXPIRED", "token已过期")
 
@@ -42,6 +46,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		fmt.Println("4.token解析成功，用户ID：", claims.UserID)
 		c.Set("userID", claims.UserID)
 		c.Set("username", claims.Username)
 		c.Next()

@@ -24,9 +24,9 @@ func main() {
 
 	userHandler := handler.NewUserHandler(userService)
 	videoHandler := handler.NewVideoHandler(videoService)
-	interactionHander := handler.NewInteractionHandler(interactionService)
+	interactionHandler := handler.NewInteractionHandler(interactionService)
 	socialHandler := handler.NewSocialHandler(socialService)
 
-	r := router.SetupRouter(userHandler, videoHandler, interactionHander, socialHandler)
+	r := router.SetupRouter(userHandler, videoHandler, interactionHandler, socialHandler)
 	r.Run(":8080")
 }

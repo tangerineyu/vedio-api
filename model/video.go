@@ -1,8 +1,13 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Video struct {
+	gorm.Model
 	UserID        uint   `gorm:"not null; index"`
 	Author        User   `gorm:"foreignKey:UserID"`
 	Title         string `gorm:"not null; type:varchar(255)"`
