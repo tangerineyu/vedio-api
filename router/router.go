@@ -22,6 +22,9 @@ func SetupRouter(
 		userGroup.POST("login/", userHandler.Login)
 		userGroup.GET("/", middleware.AuthMiddleware(), userHandler.GetUserInfo)
 		userGroup.POST("avatar/upload/", middleware.AuthMiddleware(), userHandler.UploadAvatar)
+		userGroup.GET("mfa/qrcode", middleware.AuthMiddleware(), userHandler.GenerateMFA)
+		userGroup.POST("mfa/bind", middleware.AuthMiddleware(), userHandler.BindMFA)
+		//userGroup.POST("search/image", userHandler.ImageSearch)
 	}
 	feedGroup := r.Group("/feed")
 	{
@@ -49,6 +52,9 @@ func SetupRouter(
 		relationGroup.GET("follower/list/", socialHandler.FollowerList)
 		relationGroup.GET("friend/list/", middleware.AuthMiddleware(), socialHandler.FriendList)
 	}
-
+	// 模拟点击
+	apigroup.POST("video/visit/:id", videoHandler.VisitVideo)
+	// 排行榜
+	apigroup.GET("rank/popular", videoHandler.PopularRank)
 	return r
 }

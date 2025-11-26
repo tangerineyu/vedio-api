@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 	"time"
 	"video-api/model"
 	"video-api/repository"
@@ -15,6 +17,35 @@ type VideoService struct {
 	userRepo  repository.IUserRepository
 	rdb       *redis.Client
 	ctx       context.Context
+}
+
+func (v *VideoService) VisitVideo(videoID uint) error {
+	//redis 计数+1
+	//ZINCRBY video:rank:daily 1 videoID
+	err := v.rdb.ZIncrBy(v.ctx, RanKey, 1, fmt.Sprintf("%d", videoID)).Err()
+	if err != nil {
+		return err
+	}
+	go v.videoRepo.IncrVisitCount(videoID)
+	return nil
+}
+
+func (v *VideoService) GetPopularRank() (*types.VideoListResponse, error) {
+	videoIDsStr, err := v.rdb.ZRevRange(v.ctx, RanKey, 0, 9).Result()
+	if err != nil {
+		return nil, err
+	}
+	var videos []model.Video
+	for _, idStr := range videoIDsStr {
+		vid, _ := strconv.Atoi(idStr)
+		v, _ := v.videoRepo.GetVideosByID(uint(vid))
+		if v != nil {
+			videos = append(videos, *v)
+		}
+	}
+	return &types.VideoListResponse{
+		VideoList: v.packVideoInfos(videos, 0),
+	}, nil
 }
 
 func (v *VideoService) GetPublishList(targetUserID uint, currentUserID uint) (*types.VideoListResponse, error) {
@@ -38,11 +69,15 @@ func (v *VideoService) PublishVideo(userID uint, title, plyPath, coverPath strin
 	return v.videoRepo.CreateVideo(video)
 }
 
+const RanKey = "video:rank:daily"
+
 type IVideoService interface {
 	PublishVideo(userID uint, title, plyPath, coverPath string) error
 	GetPublishList(targetUserID uint, currentUserID uint) (*types.VideoListResponse, error)
 	Feed(latestTime int64, userID uint) (*types.FeedResponse, error)
 	Search(keyword string) (*types.VideoListResponse, error)
+	VisitVideo(videoID uint) error
+	GetPopularRank() (*types.VideoListResponse, error)
 }
 
 func NewVideoService(uRepo repository.IUserRepository, vRepo repository.IVideoRepository, rdb *redis.Client, ctx context.Context) IVideoService {

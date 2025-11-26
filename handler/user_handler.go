@@ -114,7 +114,7 @@ func (h *UserHandler) UploadAvatar(c *gin.Context) {
 	Success(c, http.StatusOK, gin.H{"avatar_url": avatarURL})
 }
 
-//GET /user/mfa/qrcode
+// GET /user/mfa/qrcode
 func (h *UserHandler) GenerateMFA(c *gin.Context) {
 	userId, ok := getUserID(c)
 	if !ok {
@@ -128,7 +128,7 @@ func (h *UserHandler) GenerateMFA(c *gin.Context) {
 	Success(c, http.StatusOK, resp)
 }
 
-//POST /user/mfa/bind
+// POST /user/mfa/bind
 func (h *UserHandler) BindMFA(c *gin.Context) {
 	userId, ok := getUserID(c)
 	if !ok {
@@ -146,3 +146,5 @@ func (h *UserHandler) BindMFA(c *gin.Context) {
 	}
 	Success(c, http.StatusOK, "MFA绑定成功")
 }
+
+// POST /tool/search_image

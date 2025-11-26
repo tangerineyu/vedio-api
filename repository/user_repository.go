@@ -11,6 +11,7 @@ type IUserRepository interface {
 	FindUserByUsername(username string) (*model.User, error)
 	FindUserByID(userID uint) (*model.User, error)
 	UpdateAvatar(userID uint, avatarUrl string) error
+	EnableMFA(userID uint, secret string) error
 }
 type userRepository struct {
 	db *gorm.DB

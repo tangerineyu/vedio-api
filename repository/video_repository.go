@@ -1,9 +1,10 @@
 package repository
 
 import (
-	"gorm.io/gorm"
 	"time"
 	"video-api/model"
+
+	"gorm.io/gorm"
 )
 
 type videoRepository struct {
@@ -36,7 +37,7 @@ func (v videoRepository) SearchVideos(keywords string) ([]model.Video, error) {
 	var videos []model.Video
 	kw := "%" + keywords + "%"
 	result := v.db.Preload("Author").
-		Where("title LIKE ?", kw).
+		Where("title LIKE ? OR description LIKE ?", kw).
 		Order("created_at desc").
 		Find(&videos)
 	return videos, result.Error
@@ -47,6 +48,10 @@ func (v videoRepository) GetVideosByID(videoID uint) (*model.Video, error) {
 	result := v.db.First(&video, videoID)
 	return &video, result.Error
 }
+func (r *videoRepository) IncrVisitCount(videoID uint) error {
+	return r.db.Model(&model.Video{}).Where("id = ?", videoID).
+		Update("visit_count", gorm.Expr("visit_count + ?", 1)).Error
+}
 
 type IVideoRepository interface {
 	CreateVideo(video *model.Video) error
@@ -54,6 +59,7 @@ type IVideoRepository interface {
 	GetVideosByUserID(userID uint) ([]model.Video, error)
 	SearchVideos(keywords string) ([]model.Video, error)
 	GetVideosByID(videoID uint) (*model.Video, error)
+	IncrVisitCount(videoID uint) error
 }
 
 func NewVideoRepository(db *gorm.DB) IVideoRepository {

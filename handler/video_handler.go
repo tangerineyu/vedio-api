@@ -84,3 +84,20 @@ func (h *VideoHandler) List(c *gin.Context) {
 	}
 	Success(c, http.StatusOK, resp)
 }
+
+// POST /video/visit/:id
+func (h *VideoHandler) VisitVideo(c *gin.Context) {
+	idStr := c.Param("id")
+	id, _ := strconv.Atoi(idStr)
+	h.videoService.VisitVideo(uint(id))
+	Success(c, http.StatusOK, gin.H{"msg": "访问量增加成功"})
+}
+func (h *VideoHandler) PopularRank(c *gin.Context) {
+	resp, err := h.videoService.GetPopularRank()
+	if err != nil {
+		Error(c, http.StatusInternalServerError, "RANK_ERROR", "获取热门视频失败")
+		return
+	}
+	SuccessList(c, resp.VideoList, nil)
+
+}
