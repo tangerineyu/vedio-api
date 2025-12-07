@@ -3,6 +3,7 @@ package main
 import (
 	"video-api/database"
 	"video-api/handler"
+	"video-api/pkg/config"
 	"video-api/pkg/ws"
 	"video-api/repository"
 	"video-api/router"
@@ -10,6 +11,7 @@ import (
 )
 
 func main() {
+	config.Init()
 	database.InitDB()
 	database.InitRedis()
 	//启动webSocket管理器
@@ -33,5 +35,5 @@ func main() {
 	chatHandler := handler.NewChatHandler(msgService)
 
 	r := router.SetupRouter(userHandler, videoHandler, interactionHandler, socialHandler, chatHandler)
-	r.Run(":8080")
+	r.Run(":" + config.Conf.Server.Port)
 }

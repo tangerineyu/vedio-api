@@ -13,6 +13,11 @@ services:
         - mysql_data:/var/lib/mysql
     networks:
         - video_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      timeout: 5s
+      retries: 20
+      interval: 5s
   redis:
     image: redis:alpine
     container_name: video_redis
@@ -25,22 +30,16 @@ services:
     container_name: video_app
     ports:
       - "8080:8080"
-    environment:
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=video_db
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
     depends_on:
       - mysql
       - redis
     volumes:
       - ./upload:/app/uploads
+      - ./config.docker.yaml:/app/config.yaml
     networks:
       - video_net
 volumes:
     mysql_data:
 networks:
     video_net:
+

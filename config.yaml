@@ -1,0 +1,20 @@
+server:
+  port: "8080"
+mysql:
+  host: "127.0.0.1"
+  port: "3306"
+  user: "root"
+  password: "root"
+  dbname: "video_db"
+redis:
+  host: "127.0.0.1"
+  port: "6379"
+  password: ""
+  db: 0
+jwt:
+  secret: "my_super_secret_key_fanone"
+minio:
+  endpoint: "127.0.0.1:9000"
+  access_key: "minioadmin"
+  secret_key: "minioadmin"
+  bucket: "videostorage"

@@ -3,29 +3,31 @@ package database
 import (
 	"context"
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"log"
-	"os"
+	"video-api/pkg/config"
+
+	"github.com/redis/go-redis/v9"
 )
 
 var RDB *redis.Client
 var Ctx = context.Background()
 
 func InitRedis() {
-	redisHost := os.Getenv("REDIS_HOST")
+	/**redisHost := os.Getenv("REDIS_HOST")
 	if redisHost == "" {
 		redisHost = "127.0.0.1"
 	}
 	redisPort := os.Getenv("REDIS_PORT")
 	if redisPort == "" {
 		redisPort = "6379"
-	}
-	redisAddr := fmt.Sprintf("%s:%s", redisHost, redisPort)
+	}**/
+	redisConfig := config.Conf.Redis
+	redisAddr := fmt.Sprintf("%s:%s", redisConfig.Host, redisConfig.Port)
 
 	RDB = redis.NewClient(&redis.Options{
 		Addr:     redisAddr,
-		Password: "",
-		DB:       0,
+		Password: redisConfig.Password,
+		DB:       redisConfig.DB,
 	})
 	_, err := RDB.Ping(Ctx).Result()
 	if err != nil {

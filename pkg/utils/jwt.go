@@ -3,11 +3,13 @@ package utils
 import (
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
+
 	"time"
 	"video-api/model"
+	"video-api/pkg/config"
 )
 
-var JwtSecretKey = []byte("my_super_secret_key")
+//var JwtSecretKey = []byte("my_super_secret_key")
 
 // Claims access token
 // access token每次请求使用
@@ -23,6 +25,9 @@ type RefreshClaims struct {
 	jwt.RegisteredClaims
 }
 
+func getSecret() []byte {
+	return []byte(config.Conf.JWT.Secret)
+}
 func GenerateTokens(user *model.User) (accessToken, refreshToken string, err error) {
 	//access token 2hours
 	accessExpirationTime := time.Now().Add(time.Hour * 2)
@@ -34,7 +39,7 @@ func GenerateTokens(user *model.User) (accessToken, refreshToken string, err err
 		},
 	}
 	accessTokenJwt := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
-	accessToken, err = accessTokenJwt.SignedString(JwtSecretKey)
+	accessToken, err = accessTokenJwt.SignedString(getSecret())
 	if err != nil {
 		return "", "", err
 	}
@@ -47,7 +52,7 @@ func GenerateTokens(user *model.User) (accessToken, refreshToken string, err err
 		},
 	}
 	refreshTokenJwt := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-	refreshToken, err = refreshTokenJwt.SignedString(JwtSecretKey)
+	refreshToken, err = refreshTokenJwt.SignedString(getSecret())
 	return accessToken, refreshToken, err
 }
 
@@ -60,7 +65,7 @@ func ParseToken(tokenString string) (*Claims, error) {
 	//与 tokenString 内的签名对比
 	//如果不一致 → 表示 token 被改过 → 会返回 error
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return JwtSecretKey, nil
+		return getSecret(), nil
 	})
 	if err != nil {
 		return nil, err

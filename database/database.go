@@ -3,9 +3,9 @@ package database
 import (
 	"fmt"
 	"log"
-	"os"
 	"time"
 	"video-api/model"
+	"video-api/pkg/config"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -15,7 +15,7 @@ var DB *gorm.DB
 
 func InitDB() {
 	//从环境变量中获取DB地址，默认为127.0.0.1
-	dbHost := os.Getenv("DB_HOST")
+	/**dbHost := os.Getenv("DB_HOST")
 	if dbHost == "" {
 		dbHost = "127.0.0.1"
 	}
@@ -34,9 +34,11 @@ func InitDB() {
 	dbName := os.Getenv("DB_NAME")
 	if dbName == "" {
 		dbName = "video_db"
-	}
+	} **/
+	//直接从config读取
+	m := config.Conf.MySQL
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		dbUser, dbPassword, dbHost, dbPort, dbName)
+		m.User, m.Password, m.Host, m.Port, m.DBName)
 	fmt.Println("dsn:", dsn)
 	//
 	//dsn := "root:123456@tcp(127.0.0.1:3306)/video_db?charset=utf8mb4&parseTime=True&loc=Local"
