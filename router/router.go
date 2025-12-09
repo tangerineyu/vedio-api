@@ -15,6 +15,7 @@ func SetupRouter(
 	chatHandler *handler.ChatHandler,
 ) *gin.Engine {
 	r := gin.Default()
+	r.Use(middleware.RateLimitMiddleware())
 	r.Static("/static", "./uploads")
 	apigroup := r.Group("/")
 	userGroup := apigroup.Group("/user")

@@ -37,6 +37,8 @@ var (
 	//404
 	CommentNotFoundErr = NewErrNo(40401, "评论不存在")
 	VideoNotFoundErr   = NewErrNo(40402, "视频不存在")
+	//
+	TooManyRequestErr = NewErrNo(42901, "请求过频繁")
 	//500
 	ServiceErr = NewErrNo(50001, "服务器内部错误")
 )
