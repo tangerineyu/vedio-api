@@ -4,6 +4,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
@@ -13,10 +14,12 @@ type Config struct {
 	Redis  RedisConfig  `mapstructure:"redis"`
 	JWT    JWTConfig    `mapstructure:"jwt"`
 	OSS    OSSConfig    `mapstructure:"oss"`
-	//MinIO MinIOConfig `mapstructure:"minio"`
+	MinIO  MinIOConfig  `mapstructure:"minio"`
 }
 type ServerConfig struct {
-	Port string `mapstructure:"PORT"`
+	Port       string `mapstructure:"PORT"`
+	UploadType string `mapstructure:"UPLOAD_TYPE"`
+	RunMode    string `mapstructure:"RUN_MODE"`
 }
 type MySQLConfig struct {
 	Host     string `mapstructure:"host"`
@@ -53,15 +56,25 @@ var Conf = new(Config)
 func Init() {
 	viper.SetConfigFile("./config.yaml")
 	viper.SetConfigType("yaml")
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("读取配置文件失败,尝试读取环境变量：%v", err)
-	}
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
+	if err := viper.ReadInConfig(); err != nil {
+		log.Printf("未找到配置文件或读取失败， 尝试使用环境变量，错误信息：%v", err)
+	}
 	if err := viper.Unmarshal(Conf); err != nil {
 		log.Fatalf("解析配置文件失败：%v", err)
 	}
 	log.Println("配置加载成功")
+	//热加载
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		log.Println("检测到配置文件已经修改 ", e.Name)
+		//重新解析
+		if err := viper.Unmarshal(Conf); err != nil {
+			log.Println("配置文件重载失败，使用原配置", err)
+		} else {
+			log.Println("配置文件重载成功，新配置已经生效")
+		}
+	})
 
 }

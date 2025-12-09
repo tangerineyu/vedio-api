@@ -35,7 +35,7 @@ func (h *VideoHandler) Publish(c *gin.Context) {
 		Error(c, errno.ParamErr)
 		return
 	}
-	playURL, err := upload.UploadToOSS(data, userID)
+	playURL, err := upload.Client.UploadFile(data, userID, "video")
 	if err != nil {
 		log.Log.Error("视频上传到OSS失败",
 			zap.String("filename", data.Filename),

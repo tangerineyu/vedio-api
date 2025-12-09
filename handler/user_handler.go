@@ -127,7 +127,7 @@ func (h *UserHandler) UploadAvatar(c *gin.Context) {
 		Error(c, errno.FileUploadErr)
 		return
 	}
-	avatarURL, err := upload.UploadToOSS(file, userID)
+	avatarURL, err := upload.Client.UploadFile(file, userID, "avatar")
 	if err != nil {
 		//Error(c, http.StatusInternalServerError, "UPLOAD_FAILD", err.Error())
 		log.Log.Error("OSS上传失败",

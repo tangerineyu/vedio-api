@@ -5,6 +5,7 @@ import (
 	"video-api/handler"
 	"video-api/pkg/config"
 	"video-api/pkg/log"
+	"video-api/pkg/upload"
 	"video-api/pkg/ws"
 	"video-api/repository"
 	"video-api/router"
@@ -18,6 +19,7 @@ func main() {
 	log.Log.Info("项目正在启动")
 	database.InitDB()
 	database.InitRedis()
+	upload.Init()
 	//启动webSocket管理器
 	go ws.WebManager.Start()
 	userRepo := repository.NewUserRepository(database.DB)
