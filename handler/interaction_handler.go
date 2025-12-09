@@ -86,8 +86,11 @@ func (h *InteractionHandler) CommentAction(c *gin.Context) {
 		Error(c, errno.ParamErr)
 		return
 	}
+	commentIDStr := c.Query("comment_id")
+	cid, _ := strconv.ParseUint(commentIDStr, 10, 64)
+	commentID := uint(cid)
 	var content string
-	var commentID uint
+	//var commentID uint
 	if actionType == 1 {
 		content = c.Query("content")
 		if content == "" {

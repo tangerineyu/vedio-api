@@ -9,6 +9,8 @@ type Comment struct {
 	VideoID uint   `gorm:"not null;index"`
 	Video   Video  `gorm:"foreignKey:VideoID"`
 	Content string `gorm:"type:text;not null"`
+	//父评论id，默认为0,表示这是对视频的评论
+	ParentID uint `gorm:"default:0;index"`
 }
 type UserFavorite struct {
 	gorm.Model

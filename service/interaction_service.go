@@ -28,21 +28,50 @@ func (i *InteractionService) GetCommentList(videoID uint) (*types.CommentListRes
 	if err != nil {
 		return nil, errors.New("failed to get comments")
 	}
-	list := make([]types.CommentInfo, 0)
-	for _, comment := range comments {
-		list = append(list, types.CommentInfo{
-			ID: comment.ID,
+	var rootComments []types.CommentInfo
+	//map存ID -> *CommentInfo
+	//如果根评论就放在rootComments里，如果是子评论根据map放入ChildList
+	infoMap := make(map[uint]*types.CommentInfo)
+	//list := make([]types.CommentInfo, 0)
+	//转换并存入map
+	for i := range comments {
+		c := comments[i]
+		info := types.CommentInfo{
+			ID: c.ID,
 			User: types.UserInfoResponse{
-				ID:     comment.User.ID,
-				Name:   comment.User.Name,
-				Avatar: comment.User.Avatar,
+				ID:     c.UserID,
+				Name:   c.User.Name,
+				Avatar: c.User.Avatar,
 			},
-			Content:         comment.Content,
-			CreatedDateBase: comment.CreatedAt.Format("01-02"),
-		})
+			Content:     c.Content,
+			CreatedDate: c.CreatedAt.Format("2006-01-02 15:04:05"),
+			ChildList:   make([]*types.CommentInfo, 0),
+		}
+		infoMap[c.ID] = &info //存的是指针，如果我们存的是值（拷贝），
+		// 后续修改 map 里的对象时，结果不会反应到最终引用的地方
+	}
+	//
+	for i := range comments {
+		c := comments[i]
+		currentInfo := infoMap[c.ID]
+		if c.ParentID == 0 {
+
+		} else {
+			if parent, ok := infoMap[c.ParentID]; ok {
+				parent.ChildList = append(parent.ChildList, currentInfo)
+			}
+		}
+	}
+	for i := range comments {
+		c := comments[i]
+		if c.ParentID == 0 {
+			if root, ok := infoMap[c.ID]; ok {
+				rootComments = append(rootComments, *root)
+			}
+		}
 	}
 	return &types.CommentListResponse{
-		CommentList: list,
+		CommentList: rootComments,
 	}, nil
 }
 
@@ -88,7 +117,14 @@ func (i *InteractionService) GetFavoriteList(targetUserID uint, currentUserID ui
 
 func (i *InteractionService) CommentAction(userID, videoID uint, actionType int, commentText string, commentID uint) (*types.CommentInfo, error) {
 	if actionType == 1 {
-		comment := &model.Comment{UserID: userID, VideoID: videoID, Content: commentText}
+		parentID := commentID
+		if parentID > 0 {
+			_, err := i.InteractionRepo.GetCommentsByID(parentID)
+			if err != nil {
+				return nil, errors.New("回复的评论不存在")
+			}
+		}
+		comment := &model.Comment{UserID: userID, VideoID: videoID, Content: commentText, ParentID: parentID}
 		if err := i.InteractionRepo.CreateComment(comment); err != nil {
 			return nil, err
 		}
@@ -100,8 +136,9 @@ func (i *InteractionService) CommentAction(userID, videoID uint, actionType int,
 				Name:   user.Name,
 				Avatar: user.Avatar,
 			},
-			Content:         comment.Content,
-			CreatedDateBase: comment.CreatedAt.Format("01-02"),
+			Content:     comment.Content,
+			CreatedDate: comment.CreatedAt.Format("01-02"),
+			ChildList:   []*types.CommentInfo{},
 		}, nil
 	}
 	//删除评论
